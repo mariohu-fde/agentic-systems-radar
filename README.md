@@ -1,49 +1,72 @@
-# 📡 Agentic Systems Engineering Radar & ADRs
+# Agentic Systems Engineering Radar & ADRs
 
-> **Curated by Mario Hu (`@mariohu-fde`)**  
-> Distilling frontier `arXiv` agentic systems research into **production-grade engineering mechanisms, trade-off matrices, and Architecture Decision Records (ADRs)**.
+**Curated by Mario Hu (`@mariohu-fde`) — AI Systems & Cloud Solutions Engineer | Data & AI @ Google Cloud**
 
----
-
-## 🎯 Purpose: Compilation Over Retrieval
-
-Academic agent papers frequently optimize for benchmark leaderboards while ignoring production constraints such as **context-window inflation**, **KV-cache invalidation**, **confirmation bias in multi-step debugging**, and **skill library rot**.
-
-Every digest in this repository follows a strict **Systems Engineering Lens**:
-1. **What production failure mode does this paper solve?**
-2. **What is the concrete algorithmic mechanism?**
-3. **How does it translate into runnable Python / LangGraph / Pydantic code in [`cloudops-autonomous-agent`](https://github.com/mariohu-fde/cloudops-autonomous-agent)?**
+Distilling frontier `arXiv` agentic systems papers into **production-grade control-plane mechanisms, falsification trade-off matrices, and Architecture Decision Records (ADRs)**.
 
 ---
 
-## 📚 Curated Research Synthesis Catalog
+## Why This Repository Exists
 
-### 1. Self-Evolving Agent Harnesses & Counterfactual Memory
-- 📄 **[Self-Evolving Harnesses, Counterfactual Replay & Constitutional Caps](digests/2026-09_self-evolving-agents-and-counterfactual-replay.md)**
-  - **Key Papers**: *Dream-RSI* (`arXiv:2609.14858`), *RRSI / Total Cost of Agency* (`arXiv:2609.23790`), *RetireOPD* (`arXiv:2609.20784`), *SWE-Router* (`arXiv:2607.00053`).
-  - **Core Engineering Takeaways**:
-    - **Negative-Knowledge Contracts (`DISPROVEN_DEAD_END`)**: Why recording falsified hypotheses prevents multi-agent confirmation loops.
-    - **Counterfactual Replay Gate (`CF_Value`)**: Evaluating synthesized playbooks via offline trajectory replay before merging into the production skill index.
-    - **The `<= 120` Line Constitutional Cap**: Preventing instruction bloat ("Total Cost of Agency") through overflow consolidation.
+Academic agent papers frequently optimize for benchmark leaderboards while ignoring enterprise production constraints: **context-window inflation**, **Prefix KV-cache invalidation**, **hypothesis anchoring in multi-step debugging**, and **unstructured memory rot**.
 
-### 2. Context Compaction, Gated Memory & Tool Hygiene
-- 📄 **[5-Tier Context Compaction & Schemaless SQLite-JSON1 Tool Reduction](digests/2026-09_context-compaction-and-gated-memory.md)**
-  - **Key Papers & Patterns**: *Gated-Memory Routing* (`LongMemEval-V2`), *Refining Over Resampling* (`arXiv:2608.05643`), *Structured Output Quality Tax*.
-  - **Core Engineering Takeaways**:
-    - **Prefix KV Cache Preservation**: Why mutating system prompts mid-trajectory destroys TTFT latency and adds a 5–10x token cost multiplier.
-    - **Zero-Bloat `AfterToolCallback` Compaction**: Intercepting >50KB JSON telemetry payloads, storing raw artifacts in an out-of-band `SQLite-JSON1` store, and injecting only a compact Schema Skeleton into the LLM context.
-    - **Decoupled Reasoning vs. Formatting**: Separating free-form root-cause reasoning from strict JSON schema formatting to eliminate the "Structured Output Quality Tax."
+Every synthesis and ADR in this repository enforces a 3-step **Systems Engineering Filter**:
+1. **Failure Mode**: What concrete production bottleneck does this paper address, and where do the authors' assumptions break under real cloud telemetry?
+2. **Control-Plane Mechanism**: How do we isolate **Epistemic Actions** (read-only diagnostic probing) from **Pragmatic Actions** (state mutation) using deterministic code rather than prompt wishes?
+3. **Executable Contract**: How does it map into runnable `Pydantic V2` / `LangGraph` / `SQLite-JSON1` code in [`cloudops-autonomous-agent`](https://github.com/mariohu-fde/cloudops-autonomous-agent)?
 
-### 3. Multi-Agent Falsification & Graph-Augmented Retrieval
-- 📄 **[Falsification-First Multi-Agent DAGs & Graph-Augmented RAG](digests/2026-09_falsification-dags-and-graph-rag.md)**
-  - **Key Papers**: *RepoMAS* (`arXiv:2609.11790`), *GraMRAG* (`arXiv:2609.14066`), *SAGE* (`arXiv:2609.35412`).
-  - **Core Engineering Takeaways**:
+```mermaid
+flowchart LR
+    classDef paper fill:#1a1b26,stroke:#7aa2f7,stroke-width:2px,color:#c0caf5;
+    classDef gate fill:#1a1b26,stroke:#e0af68,stroke-width:2px,color:#c0caf5;
+    classDef prod fill:#1a1b26,stroke:#9ece6a,stroke-width:2px,color:#c0caf5;
+
+    P["Frontier arXiv Papers<br/>• Dream-RSI / RRSI<br/>• RepoMAS / GraMRAG<br/>• Epistemic Action / Substrate Inversion"]:::paper
+    G["Falsification & Stress-Test Gate<br/>• KV-Cache & Token Cost Audit<br/>• Infinite-Probe Loop Check<br/>• Positional vs. Immutable ID Audit"]:::gate
+    C["Production ADRs & Code Contracts<br/>• ADR-001: Falsification StateGraph<br/>• ADR-002: DisprovenDeadEnd & <=120 Cap<br/>• ADR-003: SQLite-JSON1 Tool Compactor"]:::prod
+
+    P --> G --> C
+```
+
+---
+
+## Architecture Decision Records (ADRs)
+
+| ADR | Decision Summary | Primary Bottleneck Solved |
+| :--- | :--- | :--- |
+| **[ADR-001](adrs/ADR-001-falsification-first-stategraph.md)** | **Falsification-First StateGraph over Open-Ended ReAct Loops** | Prevents single-agent confirmation bias on ambiguous cloud telemetry by requiring explicit hypothesis disproof before remediation. |
+| **[ADR-002](adrs/ADR-002-negative-knowledge-dead-end-contracts.md)** | **Negative-Knowledge (`DISPROVEN_DEAD_END`) & `<=120` Line Constitutional Cap** | Blocks agents from re-probing falsified root causes and prevents long-term skill library bloat (`Total Cost of Agency`). |
+| **[ADR-003](adrs/ADR-003-sqlite-json1-tool-output-compaction.md)** | **Zero-Bloat Tool Output Compaction via Out-of-Band `SQLite-JSON1`** | Intercepts `>1,500` char JSON tool dumps, preserves full evidence out-of-band, and emits bounded `<400-token` digests with `payload_ref` handles. |
+
+---
+
+## Curated Research Synthesis Catalog
+
+### 1. Epistemic Action Gates & Typed State Substrates (`2026-10-06`)
+- **[Epistemic Action Gates & Typed State Substrates](digests/2026-10-06_epistemic-actions-and-substrate-inversion.md)**
+  - **Papers Evaluated**: *Before Agents Decide: Epistemic Action in LLM-Based Systems* (`arXiv:2610.00511`, NeurIPS 2026 FAST), *The Agentic Company OS: Substrate Inversion* (`arXiv:2609.13334`).
+  - **Systems Engineering Verdicts**:
+    - **Hard Epistemic-to-Pragmatic Gate**: Isolating read-only diagnostic probing from state-mutating operations via explicit state-machine transitions to eliminate infinite probing loops.
+    - **Immutable ID Correlation over Positional Offsets**: Why binding streaming evaluation traces or multi-agent state by array index (`Trace[k]`) rather than immutable primary keys (`turn_id` / `payload_ref`) causes silent evaluation skew when intermediate turns drop.
+
+### 2. Self-Evolving Agent Harnesses & Counterfactual Memory (`2026-09-29`)
+- **[Self-Evolving Harnesses, Counterfactual Replay & Constitutional Caps](digests/2026-09_self-evolving-agents-and-counterfactual-replay.md)**
+  - **Papers Evaluated**: *Dream-RSI* (`arXiv:2609.14858`), *RRSI / Total Cost of Agency* (`arXiv:2609.23790`), *RetireOPD* (`arXiv:2609.20784`), *SWE-Router* (`arXiv:2607.00053`).
+  - **Systems Engineering Verdicts**:
+    - **Negative-Knowledge Contracts (`DISPROVEN_DEAD_END`)**: Recording falsified hypotheses with hard telemetry evidence prevents multi-agent confirmation loops.
+    - **Counterfactual Replay Gate (`CF_Value`)**: Scoring candidate playbook rules against historical traces before promotion.
+    - **The `<= 120` Line Constitutional Cap**: Enforcing overflow consolidation so long-term agent memory never degrades instruction following.
+
+### 3. Multi-Agent Falsification & Graph-Augmented Retrieval (`2026-09-30`)
+- **[Falsification-First Multi-Agent DAGs & Graph-Augmented RAG](digests/2026-09_falsification-dags-and-graph-rag.md)**
+  - **Papers Evaluated**: *RepoMAS* (`arXiv:2609.11790`), *GraMRAG* (`arXiv:2609.14066`), *SAGE* (`arXiv:2609.35412`).
+  - **Systems Engineering Verdicts**:
     - **Anti-Anchoring Prompting (`FAILED_ATTEMPT`)**: Framing prior agent steps as unverified attempts that must be falsified against hard telemetry.
-    - **Readiness Gate (`should_decompose`)**: Dynamic complexity gating to bypass heavy multi-agent orchestration on deterministic single-hop incidents.
+    - **Readiness Gate (`should_decompose`)**: Dynamic complexity gating to bypass multi-agent overhead on deterministic single-hop incidents.
 
----
-
-## 🏛️ Architecture Decision Records (ADRs)
-
-- **[ADR-001: Falsification-First StateGraph over Open-Ended ReAct Loops](adrs/ADR-001-falsification-first-stategraph.md)**
-- **[ADR-002: Negative-Knowledge (`DISPROVEN_DEAD_END`) & `<=120` Line Cap for Skill Distillation](adrs/ADR-002-negative-knowledge-dead-end-contracts.md)**
+### 4. Context Compaction, Gated Memory & Tool Hygiene (`2026-09-23`)
+- **[5-Tier Context Compaction & Schemaless SQLite-JSON1 Tool Reduction](digests/2026-09_context-compaction-and-gated-memory.md)**
+  - **Papers Evaluated**: *Gated-Memory Routing* (`LongMemEval-V2`), *Refining Over Resampling* (`arXiv:2608.05643`), *Structured Output Quality Tax*.
+  - **Systems Engineering Verdicts**:
+    - **Prefix KV Cache Preservation**: Keeping system prompts static mid-trajectory to avoid 5–10x TTFT latency and cost penalties.
+    - **Decoupled Reasoning vs. Formatting**: Separating free-form root-cause analysis from strict JSON schema serialization.
