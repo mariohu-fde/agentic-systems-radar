@@ -21,9 +21,9 @@ flowchart LR
     classDef gate fill:#1a1b26,stroke:#e0af68,stroke-width:2px,color:#c0caf5;
     classDef prod fill:#1a1b26,stroke:#9ece6a,stroke-width:2px,color:#c0caf5;
 
-    P["Frontier arXiv Papers<br/>• Dream-RSI / RRSI<br/>• RepoMAS / GraMRAG<br/>• Epistemic Action / Substrate Inversion"]:::paper
-    G["Falsification & Stress-Test Gate<br/>• KV-Cache & Token Cost Audit<br/>• Infinite-Probe Loop Check<br/>• Positional vs. Immutable ID Audit"]:::gate
-    C["Production ADRs & Code Contracts<br/>• ADR-001: Falsification StateGraph<br/>• ADR-002: DisprovenDeadEnd & <=120 Cap<br/>• ADR-003: SQLite-JSON1 Tool Compactor"]:::prod
+    P["Frontier arXiv Papers<br/>• Dream-RSI / RRSI<br/>• RepoMAS / GraMRAG<br/>• Epistemic Action / Collective Inference"]:::paper
+    G["Falsification & Stress-Test Gate<br/>• KV-Cache & Token Cost Audit<br/>• Infinite-Probe Loop Check<br/>• Blind-Isolated vs. Broadcast Audit"]:::gate
+    C["Production ADRs & Code Contracts<br/>• ADR-001: Falsification StateGraph<br/>• ADR-002: DisprovenDeadEnd & <=120 Cap<br/>• ADR-003: SQLite-JSON1 Tool Compactor<br/>• ADR-004: Blind-Isolated Subagent Topology"]:::prod
 
     P --> G --> C
 ```
@@ -37,6 +37,7 @@ flowchart LR
 | **[ADR-001](adrs/ADR-001-falsification-first-stategraph.md)** | **Falsification-First StateGraph over Open-Ended ReAct Loops** | Prevents single-agent confirmation bias on ambiguous cloud telemetry by requiring explicit hypothesis disproof before remediation. |
 | **[ADR-002](adrs/ADR-002-negative-knowledge-dead-end-contracts.md)** | **Negative-Knowledge (`DISPROVEN_DEAD_END`) & `<=120` Line Constitutional Cap** | Blocks agents from re-probing falsified root causes and prevents long-term skill library bloat (`Total Cost of Agency`). |
 | **[ADR-003](adrs/ADR-003-sqlite-json1-tool-output-compaction.md)** | **Zero-Bloat Tool Output Compaction via Out-of-Band `SQLite-JSON1`** | Intercepts `>1,500` char JSON tool dumps, preserves full evidence out-of-band, and emits bounded `<400-token` digests with `payload_ref` handles. |
+| **[ADR-004](adrs/ADR-004-blind-isolated-subagent-topologies.md)** | **Blind-Isolated Subagent Probing over All-to-All Broadcast** | Eliminates multi-agent groupthink (`arXiv:2610.05041`) and top-level config illusions by isolating parallel probers until evidence converges at the falsification gate. |
 
 ---
 
