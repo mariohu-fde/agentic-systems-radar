@@ -6,29 +6,28 @@
 
 ---
 
-## 1. Core Architectural Mechanisms
+## 1. Core Paper Mechanisms
 
 ### A. Intermediate Evidence Compilation (`arXiv:2610.03174`)
-- Multi-agent retrieval workflows typically pipe raw heterogeneous tool outputs (tabular SQL results, log slices, unstructured runbooks) directly into the orchestrator's reasoning window.
+- Multi-agent deep-research workflows typically pipe raw heterogeneous tool outputs (tabular SQL results, document chunks, API responses) directly into the central orchestrator's context window.
 - *FinNextAssist* interposes a dedicated **Evidence Compiler** between domain worker agents (`TabAgent`, `HeteroAgent`) and the central reasoning engine, normalizing raw observations into compact, provenance-linked evidence blocks before synthesis.
 
 ### B. Topological Isolation vs. All-to-All Broadcast (`arXiv:2610.05041`)
 - Game-theoretic multi-agent experiments demonstrate that **All-to-All Broadcast** communication topologies drive LLM populations to rapidly converge on **high-confidence false consensus** (groupthink).
-- Enforcing **sparse, information-isolated topologies**—where subagents gather evidence independently before structured aggregation—preserves population diversity and self-correction capacity.
+- Enforcing **sparse, information-isolated topologies**—where subagents gather evidence independently before structured aggregation—preserves population diversity and collective error-correction capacity.
 
 ---
 
-## 2. Production Stress-Test & Engineering Critique
+## 2. Paper Stress-Test & Systems Critique
 
-| Paper Claim | Production Failure Mode | Systems Engineering Verdict |
+| Paper Claim | Architectural Failure Mode | Open-Source Implementation Verdict |
 | :--- | :--- | :--- |
-| Insert an LLM-based Evidence Compiler between subagents and the primary reasoner (`arXiv:2610.03174`) | Adding an extra LLM inference pass per tool call inflates end-to-end P99 latency and compounds token cost. | **Replace LLM Compiler with Deterministic `SQLite-JSON1` Preprocessor**: Execute evidence compilation via deterministic schema extraction (`<400-token` digest + immutable `payload_ref` pointer), cutting context noise by ~70% at zero LLM latency overhead. |
-| Restrict inter-agent communication topology to prevent premature consensus (`arXiv:2610.05041`) | When parallel diagnostic subagents (e.g., Database Prober vs. Compute Scheduler Prober) read each other's intermediate scratchpads, an early unverified guess anchors the entire swarm. | **Enforce Blind-Isolated Subagent Probing**: Dispatch subagents with isolated context scopes (`File-Path-Only` / `Telemetry-Slice-Only`). Subagents return strictly typed `EvidenceBlock` or `DisprovenDeadEnd` records to the falsification gate without lateral peer broadcast. |
+| Insert an LLM-based Evidence Compiler between subagents and the primary reasoner (`arXiv:2610.03174`) | Adding an extra LLM inference pass per tool call inflates end-to-end P99 latency and compounds token cost. | **Replace LLM Compiler with Deterministic `SQLite-JSON1` Preprocessor (`ADR-003`)**: Execute evidence compilation via deterministic schema extraction (`<400-token` digest + immutable `payload_ref` pointer), cutting context noise by ~70% at zero LLM latency overhead. |
+| Restrict inter-agent communication topology to prevent premature consensus (`arXiv:2610.05041`) | When parallel subagents read each other's intermediate scratchpads, an early unverified guess anchors the entire swarm. | **Enforce Blind-Isolated Subagent Probing (`ADR-004`)**: Dispatch parallel `LangGraph` subagents (`Send` API) with isolated state slices. Subagents return strictly typed `EvidenceBlock` or `DisprovenDeadEnd` records to the central gate without lateral peer broadcast. |
 
 ---
 
-## 3. Concrete Distributed Systems Pattern: Hierarchical Config Shadowing & Quota Starvation
+## 3. Open-Source `LangGraph` / `Pydantic` Blueprint
 
-Two recurring distributed control-plane failure modes reinforce why deterministic evidence compilers must inspect **effective leaf-node state** rather than top-level config intent:
-1. **Priority Without Admission Reservation**: Elevating a workload's scheduling priority has zero effect if lower-priority batch jobs are permitted to consume 100% of a shared resource pool without a hard charging cap (e.g., `0.5` batch ceiling). High-priority jobs starve at Admission Control unless capacity is explicitly partitioned.
-2. **Leaf-Node Override Shadowing**: In hierarchical pipeline runners, setting a top-level cluster migration override (`scheduling_override.allowed_cells`) is silently ignored whenever child sub-tasks (`footprints`) declare their own local `scheduling` block. Diagnostic agents must verify effective leaf-level execution descriptors rather than trusting top-level configuration diffs.
+1. **Star-to-Gate Fan-Out (`LangGraph Send` API)**: Map each candidate hypothesis to an isolated worker node that receives only its hypothesis description and read-only tool handles—never the shared conversation history of sibling workers.
+2. **Provenance-Linked `EvidenceBlock`**: Require every worker to return a `Pydantic` `EvidenceBlock(hypothesis_id, payload_ref, key_findings, falsified)` validated against deterministic `SQLite-JSON1` slices.
